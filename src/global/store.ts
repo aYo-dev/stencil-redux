@@ -32,6 +32,9 @@ Context.store = (function() {
     // TODO: Don't listen for each component
     const _mapStateToProps = (_component, _mapState) => {
       const mergeProps = mapState(_store.getState());
+      if (!mergeProps) {
+        return;
+      } 
       Object.keys(mergeProps).forEach(newPropName => {
         let newPropValue = mergeProps[newPropName];
         component[newPropName] = newPropValue;
