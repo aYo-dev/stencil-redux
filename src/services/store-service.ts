@@ -1,9 +1,16 @@
+import {
+  Store,
+  MapStateToProps,
+  Props,
+  Action
+} from '../global/interfaces';
+
 class StoreService {
-  private _store;
+  private _store: Store;
 
   private queue: any[] = [];
 
-  public setStore(store) {
+  public setStore(store: Store) {
     this._store = store;
     this.clearTheQueue();
   }
@@ -16,14 +23,13 @@ class StoreService {
     return this._store && this._store.getState();
   }
 
-  public connect(component, mapState, props) {
+  public connect(component, mapState: MapStateToProps, props: Props) {
     if (!this._store) {
       this.queue.push({component, mapState, props});
 
       return;
     }
 
-    console.log(component);
     this.mapStateToProps(component, mapState);
     this.mapDispatchToProps(component, props);
   }
@@ -34,29 +40,26 @@ class StoreService {
     }
   }
 
-  private mapDispatchToProps(component, props) {
+  private mapDispatchToProps(component, props: Props) {
     Object.keys(props).forEach(actionName => {
-      const action = props[actionName];
+      const action: Action = props[actionName];
       Object.defineProperty(component, actionName, {
-        get: () => (...args) => action(...args)(this._store.dispatch, this._store.getState),
+        get: () => (...args: any[]) => action(...args)(this._store.dispatch, this._store.getState),
         configurable: true,
         enumerable: true
       });
     });
-    console.log('mapDispatchToProps', component, props);    
   }
 
-  private mapStateToProps(component, mapState) {
-    // TODO: Don't listen for each component
-    const _mapStateToProps = (_component, _mapState) => {
-      const mergeProps = mapState(this._store.getState());
+  private mapStateToProps(component, mapState: MapStateToProps) {
+    const _mapStateToProps = (_component, _mapState: MapStateToProps) => {
+      const mergeProps = _mapState(this._store.getState());
       if(!mergeProps) {
         return;
       }
       Object.keys(mergeProps).forEach(newPropName => {
         let newPropValue = mergeProps[newPropName];
-        component[newPropName] = newPropValue;
-        // TODO: can we define new props and still have change detection work?
+        _component[newPropName] = newPropValue;
       });
     };
 

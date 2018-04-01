@@ -3,6 +3,5 @@ exports.config = {
   generateDistribution: true,
   generateWWW: true,
   bundles: [
-  ],
-  global: 'src/global/store.ts'
+  ]
 };
