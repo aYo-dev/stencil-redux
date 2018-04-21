@@ -1,11 +1,11 @@
 import storeService  from '../services/store-service';
-import { Props, MapStateToProps } from './interfaces';
+import { IConnectArgs } from './interfaces';
 
-export function connect({mapState, props}) {
-  return (target) => {
-    var original = target;
-    function construct(constructor: any, args: any) {
-      var c : any = function () {
+export function connect({mapState, props}: IConnectArgs) {
+  return (target: FunctionConstructor) => {
+    const  original = target;
+    function construct(constructor: FunctionConstructor, args: any) {
+      const c: any = function (): Function {
         const instance =  new constructor(args);
         storeService.connect(instance, mapState, props);
         
@@ -16,7 +16,7 @@ export function connect({mapState, props}) {
       return new c();
     }
 
-    var f : any = function (...args: any[]) {      
+    const f : any = function (...args: any[]) {      
       return construct(original, args);
     };
     

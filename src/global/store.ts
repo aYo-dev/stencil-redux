@@ -1,6 +1,6 @@
 import storeService  from '../services/store-service';
 
-export const store = (target, key) => {
+export const store = (target: any, key: string) => {
   const getter = function () {
     return {
       setStore: storeService.setStore.bind(storeService),

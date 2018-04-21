@@ -9,3 +9,8 @@ export interface Store {
 export type Action = Function;
 export type MapStateToProps = (state: Record<string, any>) => any;
 export type Props = Record<string, () => any>;
+export type Component = Record<string, any>;
+export interface IConnectArgs {
+  mapState: MapStateToProps;
+  props: Props;
+}
