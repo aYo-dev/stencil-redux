@@ -13,7 +13,7 @@ class StoreService {
 
   public setStore(store: Store) {
     this._store = store;
-    this.walkAroundTheQueue();
+    this.apply(this.curry(this.connect));
   }
 
   public getStore() {
@@ -24,7 +24,7 @@ class StoreService {
     return this._store && this._store.getState();
   }
 
-  public connect(component: Component, mapState: MapStateToProps, props: Props) {
+  public connect(component: Component, mapState: MapStateToProps, props: Props): void {
     if (!this._store) {
       this.queue.push({component, mapState, props});
 
@@ -35,13 +35,16 @@ class StoreService {
     this.mapDispatchToProps(component, props);
   }
 
-  private walkAroundTheQueue(): void {
+  private apply(curriedFn: Function): void {
     if(this.queue && this.queue.length) {
-      // this.queue.forEach((el) => this.connect(el.component, el.mapState, el.props));
       const { component, mapState, props } = this.queue.pop();
-      this.connect(component, mapState, props);
-      this.walkAroundTheQueue();
+      curriedFn(component, mapState, props);
+      this.apply(curriedFn);
     }
+  }
+
+  private curry(fn: Function): Function {
+    return (component: Component, mapFn: MapStateToProps, props: Props) => fn(component, mapFn, props);
   }
 
   private mapDispatchToProps(component: Component, props: Props) {
@@ -56,20 +59,17 @@ class StoreService {
   }
 
   private mapStateToProps(component: Component, mapFn: MapStateToProps) {
-    const _mapStateToProps = (_component: Component, _mapState: MapStateToProps) => {
-      const mergeProps = _mapState(this._store.getState());
+      const mergeProps = mapFn(this._store.getState());
       if(!mergeProps) {
         return;
       }
+
       Object.keys(mergeProps).forEach(newPropName => {
         let newPropValue = mergeProps[newPropName];
-        _component[newPropName] = newPropValue;
+        component[newPropName] = newPropValue;
       });
-    };
 
-    this._store.subscribe(() => _mapStateToProps(component, mapFn));
-
-    _mapStateToProps(component, mapFn);
+    this._store.subscribe(() => this.mapStateToProps(component, mapFn));
   }
 }
 
